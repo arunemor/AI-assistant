@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Translator + Ollama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: white;
+        }
+
+        .container {
+            width: 500px;
+            margin: 50px auto;
+        }
+
+        textarea,
+        input,
+        select,
+        button {
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background: #6a11cb;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .result {
+            background: #2b2b3f;
+            padding: 10px;
+            min-height: 50px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Translator + Ollama Web App</h2>
+        <textarea id="text" placeholder="Paste your text here..."></textarea>
+        <select id="language">
+            <option value="hindi">Hindi</option>
+            <option value="english" selected>English</option>
+            <option value="spanish">Spanish</option>
+            <option value="french">French</option>
+            <option value="german">German</option>
+            <option value="chinese">Chinese</option>
+            <option value="arabic">Arabic</option>
+        </select>
+        <input type="text" id="question" placeholder="Ask a question (Ollama mode)">
+        <button onclick="translateText()">Translate</button>
+        <button onclick="askOllama()">Ask Ollama</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        async function translateText() {
+            const text = document.getElementById('text').value;
+            const language = document.getElementById('language').value;
+            const resultDiv = document.getElementById('result');
+
+            resultDiv.innerHTML = "Translating...";
+            const res = await fetch('/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, language })
+            });
+            const data = await res.json();
+            if (data.translated) resultDiv.innerHTML = data.translated;
+            else resultDiv.innerHTML = "Error: " + data.error;
+        }
+
+        async function askOllama() {
+            const text = document.getElementById('text').value;
+            const question = document.getElementById('question').value;
+            const language = document.getElementById('language').value;
+            const resultDiv = document.getElementById('result');
+
+            resultDiv.innerHTML = "Asking Ollama...";
+            const res = await fetch('/ollama', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, question, language })
+            });
+            const data = await res.json();
+            if (data.reply) resultDiv.innerHTML = data.reply;
+            else resultDiv.innerHTML = "Error: " + data.error;
+        }
+    </script>
+</body>
+
+</html>
